@@ -32,6 +32,8 @@
 # include <stdint.h>
 #endif
 
+#define TEST_HDADDR "XX:XX:XX:XX:XX:XX"
+#define TEST_CHANNEL 1
 #define TEST_PORT 9123
 #define TEST_PORT_2 9124
 
@@ -50,6 +52,7 @@
 
 typedef enum {
   TCP = 0,
+  RFCOMM,
   UDP,
   PIPE
 } stream_type;

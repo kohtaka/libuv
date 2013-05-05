@@ -284,6 +284,81 @@ TEST_IMPL(tcp_ref4) {
 }
 
 
+TEST_IMPL(rfcomm_ref) {
+  uv_rfcomm_t h;
+  uv_rfcomm_init(uv_default_loop(), &h);
+  uv_unref((uv_handle_t*)&h);
+  uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+  do_close(&h);
+  MAKE_VALGRIND_HAPPY();
+  return 0;
+}
+
+
+TEST_IMPL(rfcomm_ref2) {
+  uv_rfcomm_t h;
+  uv_rfcomm_init(uv_default_loop(), &h);
+  uv_listen((uv_stream_t*)&h, 128, (uv_connection_cb)fail_cb);
+  uv_unref((uv_handle_t*)&h);
+  uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+  do_close(&h);
+  MAKE_VALGRIND_HAPPY();
+  return 0;
+}
+
+
+TEST_IMPL(rfcomm_ref2b) {
+  uv_rfcomm_t h;
+  uv_rfcomm_init(uv_default_loop(), &h);
+  uv_listen((uv_stream_t*)&h, 128, (uv_connection_cb)fail_cb);
+  uv_unref((uv_handle_t*)&h);
+  uv_close((uv_handle_t*)&h, close_cb);
+  uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+  ASSERT(close_cb_called == 1);
+  MAKE_VALGRIND_HAPPY();
+  return 0;
+}
+
+
+TEST_IMPL(rfcomm_ref3) {
+  struct sockaddr_rc addr = uv_rfcomm_addr(TEST_HDADDR, TEST_CHANNEL);
+  uv_rfcomm_t h;
+  uv_rfcomm_init(uv_default_loop(), &h);
+  printf("1\n");
+  uv_rfcomm_connect(&connect_req, &h, addr, connect_and_shutdown);
+  printf("2\n");
+  uv_unref((uv_handle_t*)&h);
+  printf("3\n");
+  uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+  printf("4\n");
+  ASSERT(connect_cb_called == 1);
+  printf("5\n");
+  ASSERT(shutdown_cb_called == 1);
+  printf("6\n");
+  do_close(&h);
+  printf("7\n");
+  MAKE_VALGRIND_HAPPY();
+  printf("8\n");
+  return 0;
+}
+
+
+TEST_IMPL(rfcomm_ref4) {
+  struct sockaddr_rc addr = uv_rfcomm_addr(TEST_HDADDR, TEST_CHANNEL);
+  uv_rfcomm_t h;
+  uv_rfcomm_init(uv_default_loop(), &h);
+  uv_rfcomm_connect(&connect_req, &h, addr, connect_and_write);
+  uv_unref((uv_handle_t*)&h);
+  uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+  ASSERT(connect_cb_called == 1);
+  ASSERT(write_cb_called == 1);
+  ASSERT(shutdown_cb_called == 1);
+  do_close(&h);
+  MAKE_VALGRIND_HAPPY();
+  return 0;
+}
+
+
 TEST_IMPL(udp_ref) {
   uv_udp_t h;
   uv_udp_init(uv_default_loop(), &h);

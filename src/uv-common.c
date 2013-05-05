@@ -158,6 +158,19 @@ uv_err_t uv_last_error(uv_loop_t* loop) {
 }
 
 
+struct sockaddr_rc uv_rfcomm_addr(const char* hdaddr, int channel) {
+  struct sockaddr_rc addr;
+
+  memset(&addr, 0, sizeof(struct sockaddr_rc));
+
+  addr.rc_family = AF_BLUETOOTH;
+  addr.rc_channel = (uint8_t)channel;
+  str2ba(hdaddr, &addr.rc_bdaddr);
+
+  return addr;
+}
+
+
 struct sockaddr_in uv_ip4_addr(const char* ip, int port) {
   struct sockaddr_in addr;
 

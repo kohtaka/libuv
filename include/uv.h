@@ -147,6 +147,7 @@ typedef enum {
   XX(PROCESS, process)                                                        \
   XX(STREAM, stream)                                                          \
   XX(TCP, tcp)                                                                \
+  XX(RFCOMM, rfcomm)                                                          \
   XX(TIMER, timer)                                                            \
   XX(TTY, tty)                                                                \
   XX(UDP, udp)                                                                \
@@ -188,6 +189,7 @@ typedef struct uv_handle_s uv_handle_t;
 typedef struct uv_stream_s uv_stream_t;
 typedef struct uv_tcp_s uv_tcp_t;
 typedef struct uv_udp_s uv_udp_t;
+typedef struct uv_rfcomm_s uv_rfcomm_t;
 typedef struct uv_pipe_s uv_pipe_t;
 typedef struct uv_tty_s uv_tty_t;
 typedef struct uv_poll_s uv_poll_t;
@@ -555,7 +557,7 @@ UV_EXTERN size_t uv_strlcat(char* dst, const char* src, size_t size);
  *
  * uv_stream is an abstract class.
  *
- * uv_stream_t is the parent class of uv_tcp_t, uv_pipe_t, uv_tty_t, and
+ * uv_stream_t is the parent class of uv_tcp_t, uv_rfcomm_t, uv_pipe_t, uv_tty_t, and
  * soon uv_file_t.
  */
 struct uv_stream_s {
@@ -719,6 +721,36 @@ UV_EXTERN int uv_tcp_connect(uv_connect_t* req, uv_tcp_t* handle,
     struct sockaddr_in address, uv_connect_cb cb);
 UV_EXTERN int uv_tcp_connect6(uv_connect_t* req, uv_tcp_t* handle,
     struct sockaddr_in6 address, uv_connect_cb cb);
+
+/*
+ * uv_rfcomm_t is a subclass of uv_stream_t
+ *
+ * Represents a RFCOMM stream or RFCOMM server.
+ */
+struct uv_rfcomm_s {
+  UV_HANDLE_FIELDS
+  UV_STREAM_FIELDS
+  UV_RFCOMM_PRIVATE_FIELDS
+};
+
+UV_EXTERN int uv_rfcomm_init(uv_loop_t* loop, uv_rfcomm_t* rfcomm);
+UV_EXTERN int uv_rfcomm_bind(uv_rfcomm_t* handle, struct sockaddr_rc addr);
+
+/*
+ * Opens an existing file descriptor or SOCKET as a tcp handle.
+ */
+UV_EXTERN int uv_rfcomm_open(uv_rfcomm_t* handle, uv_os_sock_t sock);
+
+/*
+ * uv_rfcomm_connect
+ * These functions establish RFCOMM connections. Provide an
+ * initialized RFCOMM handle and an uninitialized uv_connect_t*. The callback
+ * will be made when the connection is established.
+ */
+UV_EXTERN int uv_rfcomm_connect(uv_connect_t* req,
+                                uv_rfcomm_t* handle,
+                                struct sockaddr_rc addr,
+                                uv_connect_cb cb);
 
 /* uv_connect_t is a subclass of uv_req_t */
 struct uv_connect_s {
@@ -1798,6 +1830,9 @@ UV_EXTERN int uv_fs_event_init(uv_loop_t* loop, uv_fs_event_t* handle,
 
 /* Utility */
 
+/* Convert string hardware addresses to binary structures */
+UV_EXTERN struct sockaddr_rc uv_rfcomm_addr(const char* hdaddr, int channel);
+
 /* Convert string ip addresses to binary structures */
 UV_EXTERN struct sockaddr_in uv_ip4_addr(const char* ip, int port);
 UV_EXTERN struct sockaddr_in6 uv_ip6_addr(const char* ip, int port);
@@ -1978,6 +2013,7 @@ struct uv_loop_s {
 #undef UV_REQ_PRIVATE_FIELDS
 #undef UV_STREAM_PRIVATE_FIELDS
 #undef UV_TCP_PRIVATE_FIELDS
+#undef UV_RFCOMM_PRIVATE_FIELDS
 #undef UV_PREPARE_PRIVATE_FIELDS
 #undef UV_CHECK_PRIVATE_FIELDS
 #undef UV_IDLE_PRIVATE_FIELDS

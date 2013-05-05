@@ -122,6 +122,8 @@ TESTS= \
 	test/test-tcp-unexpected-read.o \
 	test/test-tcp-writealot.o \
 	test/test-tcp-write-to-half-open-connection.o \
+	test/test-rfcomm-open.o \
+	test/test-rfcomm-close.o \
 	test/test-thread.o \
 	test/test-threadpool.o \
 	test/test-threadpool-cancel.o \

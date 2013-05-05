@@ -29,6 +29,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/rfcomm.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 
@@ -232,6 +234,8 @@ typedef struct {
   UV_STREAM_PRIVATE_PLATFORM_FIELDS                                           \
 
 #define UV_TCP_PRIVATE_FIELDS /* empty */
+
+#define UV_RFCOMM_PRIVATE_FIELDS /* empty */
 
 #define UV_UDP_PRIVATE_FIELDS                                                 \
   uv_alloc_cb alloc_cb;                                                       \

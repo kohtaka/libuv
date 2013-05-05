@@ -523,7 +523,8 @@ void uv__server_io(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
       return;
     }
 
-    if (stream->type == UV_TCP && (stream->flags & UV_TCP_SINGLE_ACCEPT)) {
+    if ((stream->type == UV_TCP && (stream->flags & UV_TCP_SINGLE_ACCEPT)) ||
+        (stream->type == UV_RFCOMM && (stream->flags & UV_RFCOMM_SINGLE_ACCEPT))) {
       /* Give other processes a chance to accept connections. */
       struct timespec timeout = { 0, 1 };
       nanosleep(&timeout, NULL);
@@ -558,6 +559,7 @@ int uv_accept(uv_stream_t* server, uv_stream_t* client) {
   switch (streamClient->type) {
     case UV_NAMED_PIPE:
     case UV_TCP:
+    case UV_RFCOMM:
       if (uv__stream_open(streamClient, streamServer->accepted_fd,
             UV_STREAM_READABLE | UV_STREAM_WRITABLE)) {
         /* TODO handle error */
@@ -595,6 +597,10 @@ int uv_listen(uv_stream_t* stream, int backlog, uv_connection_cb cb) {
   switch (stream->type) {
     case UV_TCP:
       r = uv_tcp_listen((uv_tcp_t*)stream, backlog, cb);
+      break;
+
+    case UV_RFCOMM:
+      r = uv_rfcomm_listen((uv_rfcomm_t*)stream, backlog, cb);
       break;
 
     case UV_NAMED_PIPE:
@@ -681,6 +687,7 @@ static int uv__handle_fd(uv_handle_t* handle) {
   switch (handle->type) {
     case UV_NAMED_PIPE:
     case UV_TCP:
+    case UV_RFCOMM:
       return ((uv_stream_t*) handle)->io_watcher.fd;
 
     case UV_UDP:
@@ -892,6 +899,8 @@ static uv_handle_type uv__handle_type(int fd) {
       case AF_INET:
       case AF_INET6:
         return UV_TCP;
+      case AF_BLUETOOTH:
+        return UV_RFCOMM;
       }
   }
 
@@ -1043,7 +1052,9 @@ static void uv__read(uv_stream_t* stream) {
 
 
 int uv_shutdown(uv_shutdown_t* req, uv_stream_t* stream, uv_shutdown_cb cb) {
-  assert((stream->type == UV_TCP || stream->type == UV_NAMED_PIPE) &&
+  assert((stream->type == UV_TCP ||
+          stream->type == UV_RFCOMM ||
+          stream->type == UV_NAMED_PIPE) &&
          "uv_shutdown (unix) only supports uv_handle_t right now");
   assert(uv__stream_fd(stream) >= 0);
 
@@ -1074,6 +1085,7 @@ static void uv__stream_io(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
   stream = container_of(w, uv_stream_t, io_watcher);
 
   assert(stream->type == UV_TCP ||
+         stream->type == UV_RFCOMM ||
          stream->type == UV_NAMED_PIPE ||
          stream->type == UV_TTY);
   assert(!(stream->flags & UV_CLOSING));
@@ -1110,7 +1122,9 @@ static void uv__stream_connect(uv_stream_t* stream) {
   uv_connect_t* req = stream->connect_req;
   socklen_t errorsize = sizeof(int);
 
-  assert(stream->type == UV_TCP || stream->type == UV_NAMED_PIPE);
+  assert(stream->type == UV_TCP ||
+         stream->type == UV_RFCOMM ||
+         stream->type == UV_NAMED_PIPE);
   assert(req);
 
   if (stream->delayed_error) {
@@ -1153,6 +1167,7 @@ int uv_write2(uv_write_t* req,
 
   assert(bufcnt > 0);
   assert((stream->type == UV_TCP ||
+          stream->type == UV_RFCOMM ||
           stream->type == UV_NAMED_PIPE ||
           stream->type == UV_TTY) &&
          "uv_write (unix) does not yet support other types of streams");
@@ -1234,8 +1249,10 @@ static int uv__read_start_common(uv_stream_t* stream,
                                  uv_alloc_cb alloc_cb,
                                  uv_read_cb read_cb,
                                  uv_read2_cb read2_cb) {
-  assert(stream->type == UV_TCP || stream->type == UV_NAMED_PIPE ||
-      stream->type == UV_TTY);
+  assert(stream->type == UV_TCP ||
+         stream->type == UV_RFCOMM ||
+         stream->type == UV_NAMED_PIPE ||
+         stream->type == UV_TTY);
 
   if (stream->flags & UV_CLOSING)
     return uv__set_sys_error(stream->loop, EINVAL);
@@ -1314,6 +1331,7 @@ int uv___stream_fd(uv_stream_t* handle) {
   uv__stream_select_t* s;
 
   assert(handle->type == UV_TCP ||
+         handle->type == UV_RFCOMM ||
          handle->type == UV_TTY ||
          handle->type == UV_NAMED_PIPE);
 

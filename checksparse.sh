@@ -146,6 +146,8 @@ test/test-tcp-unexpected-read.c
 test/test-tcp-write-error.c
 test/test-tcp-write-to-half-open-connection.c
 test/test-tcp-writealot.c
+test/test-rfcomm-open.c
+test/test-rfcomm-close.c
 test/test-thread.c
 test/test-threadpool-cancel.c
 test/test-threadpool.c

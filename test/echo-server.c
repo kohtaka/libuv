@@ -34,6 +34,7 @@ static uv_loop_t* loop;
 static int server_closed;
 static stream_type serverType;
 static uv_tcp_t tcpServer;
+static uv_rfcomm_t rfcommServer;
 static uv_udp_t udpServer;
 static uv_pipe_t pipeServer;
 static uv_handle_t* server;
@@ -152,6 +153,13 @@ static void on_connection(uv_stream_t* server, int status) {
     stream = malloc(sizeof(uv_tcp_t));
     ASSERT(stream != NULL);
     r = uv_tcp_init(loop, (uv_tcp_t*)stream);
+    ASSERT(r == 0);
+    break;
+
+  case RFCOMM:
+    stream = malloc(sizeof(uv_rfcomm_t));
+    ASSERT(stream != NULL);
+    r = uv_rfcomm_init(loop, (uv_rfcomm_t*)stream);
     ASSERT(r == 0);
     break;
 
@@ -277,6 +285,39 @@ static int tcp6_echo_start(int port) {
 }
 
 
+static int rfcomm_echo_start(int channel) {
+  struct sockaddr_rc addr = uv_rfcomm_addr(TEST_HDADDR, channel);
+  int r;
+
+  server = (uv_handle_t*)&rfcommServer;
+  serverType = RFCOMM;
+
+  r = uv_rfcomm_init(loop, &rfcommServer);
+  if (r) {
+    /* TODO: Error codes */
+    fprintf(stderr, "Socket creation error\n");
+    return 1;
+  }
+
+  r = uv_rfcomm_bind(&rfcommServer, addr);
+  if (r) {
+    /* TODO: Error codes */
+    fprintf(stderr, "Bind error\n");
+    return 1;
+  }
+
+  r = uv_listen((uv_stream_t*)&rfcommServer, SOMAXCONN, on_connection);
+  if (r) {
+    /* TODO: Error codes */
+    fprintf(stderr, "Listen error %s\n",
+        uv_err_name(uv_last_error(loop)));
+    return 1;
+  }
+
+  return 0;
+}
+
+
 static int udp4_echo_start(int port) {
   int r;
 
@@ -355,6 +396,17 @@ HELPER_IMPL(tcp6_echo_server) {
   loop = uv_default_loop();
 
   if (tcp6_echo_start(TEST_PORT))
+    return 1;
+
+  uv_run(loop, UV_RUN_DEFAULT);
+  return 0;
+}
+
+
+HELPER_IMPL(rfcomm_echo_server) {
+  loop = uv_default_loop();
+
+  if (rfcomm_echo_start(TEST_CHANNEL))
     return 1;
 
   uv_run(loop, UV_RUN_DEFAULT);

@@ -24,7 +24,7 @@ E=
 CSTDFLAG=--std=c89 -pedantic -Wall -Wextra -Wno-unused-parameter
 CFLAGS += -g
 CPPFLAGS += -I$(SRCDIR)/src
-LDFLAGS=-lm
+LDFLAGS=-lm -lbluetooth
 
 CPPFLAGS += -D_LARGEFILE_SOURCE
 CPPFLAGS += -D_FILE_OFFSET_BITS=64
@@ -51,6 +51,7 @@ OBJS += src/unix/process.o
 OBJS += src/unix/signal.o
 OBJS += src/unix/stream.o
 OBJS += src/unix/tcp.o
+OBJS += src/unix/rfcomm.o
 OBJS += src/unix/thread.o
 OBJS += src/unix/threadpool.o
 OBJS += src/unix/timer.o
