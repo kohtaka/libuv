@@ -9,8 +9,9 @@ core
 vgcore.*
 .buildstamp
 
-/.deps/
-/.libs/
+.deps/
+.dirstamp
+.libs/
 /aclocal.m4
 /ar-lib
 /autom4te.cache/
