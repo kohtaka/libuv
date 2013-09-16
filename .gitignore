@@ -16,7 +16,6 @@ vgcore.*
 /src/unix/uv-dtrace.h
 
 /out/
-/build/gyp
 
 /run-tests
 /run-tests.exe
