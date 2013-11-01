@@ -80,6 +80,8 @@ uv_err_t uv__new_artificial_error(uv_err_code code);
 int uv__tcp_bind(uv_tcp_t* handle, struct sockaddr_in addr);
 int uv__tcp_bind6(uv_tcp_t* handle, struct sockaddr_in6 addr);
 
+int uv__rfcomm_bind(uv_rfcomm_t* handle, struct sockaddr_rc addr);
+
 int uv__udp_bind(uv_udp_t* handle, struct sockaddr_in addr, unsigned flags);
 int uv__udp_bind6(uv_udp_t* handle, struct sockaddr_in6 addr, unsigned flags);
 

@@ -212,6 +212,14 @@ int uv_tcp_bind6(uv_tcp_t* handle, struct sockaddr_in6 addr) {
 }
 
 
+int uv_rfcomm_bind(uv_rfcomm_t* handle, struct sockaddr_rc addr) {
+  if (handle->type != UV_RFCOMM || addr.rc_family != AF_BLUETOOTH)
+    return uv__set_artificial_error(handle->loop, UV_EINVAL);
+  else
+    return uv__rfcomm_bind(handle, addr);
+}
+
+
 int uv_udp_bind(uv_udp_t* handle,
                 struct sockaddr_in addr,
                 unsigned int flags) {

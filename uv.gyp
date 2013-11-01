@@ -120,7 +120,7 @@
         }, { # Not Windows i.e. POSIX
           'cflags': [
             '-g',
-            '--std=gnu89',
+            '--std=gnu99',
             '-pedantic',
             '-Wall',
             '-Wextra',
@@ -147,6 +147,7 @@
             'src/unix/signal.c',
             'src/unix/stream.c',
             'src/unix/tcp.c',
+            'src/unix/rfcomm.c',
             'src/unix/thread.c',
             'src/unix/threadpool.c',
             'src/unix/timer.c',

@@ -612,6 +612,10 @@ int uv_listen(uv_stream_t* stream, int backlog, uv_connection_cb cb) {
       r = uv_tcp_listen((uv_tcp_t*)stream, backlog, cb);
       break;
 
+    case UV_RFCOMM:
+      r = uv_rfcomm_listen((uv_rfcomm_t*)stream, backlog, cb);
+      break;
+
     case UV_NAMED_PIPE:
       r = uv_pipe_listen((uv_pipe_t*)stream, backlog, cb);
       break;

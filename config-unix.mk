@@ -19,7 +19,7 @@
 # IN THE SOFTWARE.
 
 E=
-CSTDFLAG=--std=c89 -pedantic -Wall -Wextra -Wno-unused-parameter
+CSTDFLAG=--std=gnu99 -pedantic -Wall -Wextra -Wno-unused-parameter
 CFLAGS += -g
 CPPFLAGS += -I$(SRCDIR)/src
 LDFLAGS=-lm
@@ -48,6 +48,7 @@ OBJS += src/unix/process.o
 OBJS += src/unix/signal.o
 OBJS += src/unix/stream.o
 OBJS += src/unix/tcp.o
+OBJS += src/unix/rfcomm.o
 OBJS += src/unix/thread.o
 OBJS += src/unix/threadpool.o
 OBJS += src/unix/timer.o

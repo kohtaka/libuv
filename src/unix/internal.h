@@ -108,7 +108,8 @@ enum {
   UV_STREAM_BLOCKING  = 0x80,   /* Synchronous writes. */
   UV_TCP_NODELAY      = 0x100,  /* Disable Nagle. */
   UV_TCP_KEEPALIVE    = 0x200,  /* Turn on keep-alive. */
-  UV_TCP_SINGLE_ACCEPT = 0x400  /* Only accept() when idle. */
+  UV_TCP_SINGLE_ACCEPT = 0x400, /* Only accept() when idle. */
+  UV_RFCOMM_SINGLE_ACCEPT = 0x800  /* Only accept() when idle. */
 };
 
 /* core */
@@ -159,6 +160,9 @@ int uv_tcp_listen(uv_tcp_t* tcp, int backlog, uv_connection_cb cb);
 int uv__tcp_nodelay(int fd, int on);
 int uv__tcp_keepalive(int fd, int on, unsigned int delay);
 
+/* rfcomm */
+int uv_rfcomm_listen(uv_rfcomm_t* rfcomm, int backlog, uv_connection_cb cb);
+
 /* pipe */
 int uv_pipe_listen(uv_pipe_t* handle, int backlog, uv_connection_cb cb);
 
@@ -195,6 +199,7 @@ void uv__prepare_close(uv_prepare_t* handle);
 void uv__process_close(uv_process_t* handle);
 void uv__stream_close(uv_stream_t* handle);
 void uv__tcp_close(uv_tcp_t* handle);
+void uv__rfcomm_close(uv_rfcomm_t* handle);
 void uv__timer_close(uv_timer_t* handle);
 void uv__udp_close(uv_udp_t* handle);
 void uv__udp_finish_close(uv_udp_t* handle);

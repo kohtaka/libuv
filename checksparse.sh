@@ -48,6 +48,7 @@ src/unix/process.c
 src/unix/signal.c
 src/unix/stream.c
 src/unix/tcp.c
+src/unix/rfcomm.c
 src/unix/thread.c
 src/unix/threadpool.c
 src/unix/timer.c
